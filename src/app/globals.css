@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+:root {
+  --forest: #0f3d2e;
+  --forest-dark: #0a2b20;
+  --forest-light: #165440;
+  --white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: #ffffff;
+  color: #0f3d2e;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom scrollbar strictly in Deep Forest Green & White */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 61, 46, 0.35);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0f3d2e;
+}

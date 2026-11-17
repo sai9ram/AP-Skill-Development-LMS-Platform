@@ -1,0 +1,473 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model University {
+  id             String        @id @default(uuid())
+  code           String        @unique
+  name           String
+  universityType String        @default("State University")
+  district       String
+  state          String        @default("Andhra Pradesh")
+  status         String        @default("ACTIVE") // ACTIVE | INACTIVE | SUSPENDED
+  isActive       Boolean       @default(true)
+  isDeleted      Boolean       @default(false)
+  deletedAt      DateTime?
+  deletedBy      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  institutions   Institution[]
+  students       Student[]
+
+  @@index([isActive])
+  @@index([status])
+  @@index([isDeleted])
+}
+
+model Institution {
+  id                 String              @id @default(uuid())
+  code               String              @unique
+  name               String
+  universityId       String
+  university         University          @relation(fields: [universityId], references: [id])
+  institutionType    String              @default("Engineering College")
+  district           String
+  mandal             String              @default("")
+  city               String
+  address            String
+  pincode            String              @default("")
+  contactPerson      String              @default("")
+  contactMobile      String              @default("")
+  contactEmail       String
+  principalName      String
+  principalMobile    String              @default("")
+  status             String              @default("ACTIVE") // ACTIVE | INACTIVE | SUSPENDED | PENDING_APPROVAL
+  isActive           Boolean             @default(true)
+  isDeleted          Boolean             @default(false)
+  deletedAt          DateTime?
+  deletedBy          String?
+  createdBy          String?
+  updatedBy          String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  admins             User[]
+  students           Student[]
+  batches            Batch[]
+  institutionCourses InstitutionCourse[]
+  enrollments        BatchEnrollment[]
+  attendances        Attendance[]
+  certificates       Certificate[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+
+  @@index([universityId])
+  @@index([district])
+  @@index([status])
+  @@index([isActive])
+}
+
+model User {
+  id                 String       @id @default(uuid())
+  username           String?      @unique
+  fullName           String
+  email              String       @unique
+  passwordHash       String
+  role               String       // Primary role key e.g. "SUPER_ADMIN" | "COLLEGE_ADMIN" | custom
+  roleId             String?
+  institutionId      String?
+  institution        Institution? @relation(fields: [institutionId], references: [id])
+  phone              String?
+  designation        String       @default("Administrator")
+  status             String       @default("ACTIVE")
+  isActive           Boolean      @default(true)
+  isDeleted          Boolean      @default(false)
+  deletedAt          DateTime?
+  deletedBy          String?
+  mustChangePassword Boolean      @default(false)
+  passwordChangedAt  DateTime?
+  lastLoginAt        DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  markedAttendances  Attendance[]
+  auditLogs          AuditLog[]
+  userRoles          UserRole[]
+  notifications      Notification[]
+
+  @@index([institutionId])
+  @@index([role])
+  @@index([isActive])
+}
+
+model Course {
+  id                   String              @id @default(uuid())
+  code                 String              @unique
+  title                String
+  shortDescription     String              @default("")
+  description          String
+  category             String              @default("Technical")
+  sector               String
+  durationHours        Int
+  durationUnit         String              @default("Hours")
+  level                String              // FOUNDATION | INTERMEDIATE | ADVANCED
+  eligibility          String              @default("Any Graduate / B.Tech / Diploma")
+  learningOutcomes     String              @default("")
+  assessmentMethod     String              @default("Project & Practical Assessment")
+  certificateAvailable Boolean             @default(true)
+  status               String              @default("ACTIVE") // DRAFT | ACTIVE | INACTIVE | ARCHIVED
+  isActive             Boolean             @default(true)
+  isDeleted            Boolean             @default(false)
+  deletedAt            DateTime?
+  deletedBy            String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  institutionCourses   InstitutionCourse[]
+  batches              Batch[]
+  enrollments          BatchEnrollment[]
+  attendances          Attendance[]
+  certificates         Certificate[]
+
+  @@index([sector])
+  @@index([status])
+  @@index([isActive])
+}
+
+model Trainer {
+  id             String         @id @default(uuid())
+  trainerCode    String         @unique
+  fullName       String
+  email          String         @unique
+  phone          String
+  qualification  String
+  specialization String
+  experience     Int            @default(3)
+  certification  String         @default("")
+  documentsNote  String         @default("")
+  status         String         @default("ACTIVE") // PENDING | ACTIVE | INACTIVE | SUSPENDED
+  isActive       Boolean        @default(true)
+  isDeleted      Boolean        @default(false)
+  deletedAt      DateTime?
+  deletedBy      String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  batches        Batch[]
+  batchTrainers  BatchTrainer[]
+  attendances    Attendance[]
+
+  @@index([status])
+  @@index([isActive])
+}
+
+model InstitutionCourse {
+  id            String      @id @default(uuid())
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  courseId      String
+  course        Course      @relation(fields: [courseId], references: [id])
+  assignedAt    DateTime    @default(now())
+
+  @@unique([institutionId, courseId])
+  @@index([institutionId])
+  @@index([courseId])
+}
+
+model Batch {
+  id            String            @id @default(uuid())
+  batchCode     String            @unique
+  name          String
+  institutionId String
+  institution   Institution       @relation(fields: [institutionId], references: [id])
+  courseId      String
+  course        Course            @relation(fields: [courseId], references: [id])
+  trainerId     String?
+  trainer       Trainer?          @relation(fields: [trainerId], references: [id])
+  startDate     String
+  endDate       String
+  status        String            @default("ACTIVE") // PLANNED | ACTIVE | COMPLETED | CANCELLED | SUSPENDED
+  maxCapacity   Int               @default(60)
+  location      String            @default("Campus Skill Lab")
+  trainingMode  String            @default("Offline") // Offline | Online | Hybrid
+  isActive      Boolean           @default(true)
+  isDeleted     Boolean           @default(false)
+  deletedAt     DateTime?
+  deletedBy     String?
+  createdBy     String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  enrollments   BatchEnrollment[]
+  attendances   Attendance[]
+  batchTrainers BatchTrainer[]
+  certificates  Certificate[]
+
+  @@index([institutionId])
+  @@index([courseId])
+  @@index([trainerId])
+  @@index([status])
+  @@index([isActive])
+}
+
+model BatchTrainer {
+  id           String   @id @default(uuid())
+  batchId      String
+  batch        Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  trainerId    String
+  trainer      Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  assignedDate DateTime @default(now())
+  role         String   @default("LEAD_TRAINER") // LEAD_TRAINER | CO_TRAINER | LAB_INSTRUCTOR
+  status       String   @default("ACTIVE") // ACTIVE | REMOVED
+
+  @@unique([batchId, trainerId])
+  @@index([batchId])
+  @@index([trainerId])
+}
+
+model Student {
+  id                   String            @id @default(uuid())
+  studentUid           String            @unique // Immutable LMS Student ID e.g. AP-AU-VSP001-2026-000001
+  universityId         String
+  university           University        @relation(fields: [universityId], references: [id])
+  universityRollNo     String
+  institutionId        String
+  institution          Institution       @relation(fields: [institutionId], references: [id])
+  institutionStudentId String?
+  maskedIdentifier     String?           // Masked e.g. XXXX-XXXX-1234
+  fullName             String
+  gender               String            @default("Other")
+  dateOfBirth          String?
+  phone                String
+  email                String
+  fatherName           String            @default("")
+  motherName           String            @default("")
+  address              String            @default("")
+  district             String            @default("")
+  mandal               String            @default("")
+  qualification        String            @default("B.Tech")
+  branch               String            // course_of_study
+  academicYear         String            @default("2026-2027")
+  yearOfStudy          Int               @default(3)
+  graduationYear       Int               @default(2027)
+  category             String            @default("General")
+  status               String            @default("ACTIVE") // ACTIVE | INACTIVE | GRADUATED | SUSPENDED
+  isActive             Boolean           @default(true)
+  isDeleted            Boolean           @default(false)
+  deletedAt            DateTime?
+  deletedBy            String?
+  createdBy            String?
+  updatedBy            String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  enrollments          BatchEnrollment[]
+  attendances          Attendance[]
+  certificates         Certificate[]
+
+  @@unique([institutionId, universityRollNo])
+  @@index([studentUid])
+  @@index([universityRollNo])
+  @@index([universityId])
+  @@index([institutionId])
+  @@index([phone])
+  @@index([fullName])
+  @@index([isActive])
+}
+
+model BatchEnrollment {
+  id                String      @id @default(uuid())
+  batchId           String
+  batch             Batch       @relation(fields: [batchId], references: [id])
+  studentId         String
+  student           Student     @relation(fields: [studentId], references: [id])
+  courseId          String?
+  course            Course?     @relation(fields: [courseId], references: [id])
+  institutionId     String?
+  institution       Institution? @relation(fields: [institutionId], references: [id])
+  enrolledAt        DateTime    @default(now())
+  progressPercent   Int         @default(0)
+  status            String      @default("ACTIVE") // ACTIVE | COMPLETED | DROPPED
+  completionStatus  String      @default("IN_PROGRESS") // IN_PROGRESS | COMPLETED | NOT_COMPLETED
+  completionDate    DateTime?
+  certificateStatus String      @default("PENDING") // PENDING | ISSUED | NOT_ELIGIBLE
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([batchId, studentId])
+  @@index([batchId])
+  @@index([studentId])
+  @@index([courseId])
+  @@index([institutionId])
+}
+
+model Attendance {
+  id            String       @id @default(uuid())
+  batchId       String
+  batch         Batch        @relation(fields: [batchId], references: [id])
+  studentId     String
+  student       Student      @relation(fields: [studentId], references: [id])
+  courseId      String?
+  course        Course?      @relation(fields: [courseId], references: [id])
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id])
+  trainerId     String?
+  trainer       Trainer?     @relation(fields: [trainerId], references: [id])
+  date          String       // YYYY-MM-DD
+  status        String       // PRESENT | ABSENT | LATE | EXCUSED
+  markedById    String
+  markedBy      User         @relation(fields: [markedById], references: [id])
+  remarks       String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([batchId, studentId, date])
+  @@index([batchId, date])
+  @@index([date])
+  @@index([studentId])
+  @@index([institutionId])
+}
+
+model SystemConfig {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  category    String
+  description String
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+}
+
+model Role {
+  id              String           @id @default(uuid())
+  key             String           @unique
+  name            String
+  description     String
+  scope           String           @default("INSTITUTION")
+  hierarchyLevel  Int              @default(4)
+  isSystem        Boolean          @default(false)
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  @@index([isActive])
+  @@index([hierarchyLevel])
+}
+
+model Permission {
+  id              String           @id @default(uuid())
+  key             String           @unique
+  module          String
+  label           String
+  description     String
+  createdAt       DateTime         @default(now())
+  rolePermissions RolePermission[]
+
+  @@index([module])
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  enabled      Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId     String
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assignedBy String?
+  assignedAt DateTime @default(now())
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+model Certificate {
+  id                String      @id @default(uuid())
+  certificateNumber String      @unique
+  studentId         String
+  student           Student     @relation(fields: [studentId], references: [id])
+  batchId           String
+  batch             Batch       @relation(fields: [batchId], references: [id])
+  courseId          String
+  course            Course      @relation(fields: [courseId], references: [id])
+  institutionId     String
+  institution       Institution @relation(fields: [institutionId], references: [id])
+  issuedDate        DateTime?
+  status            String      @default("PENDING") // ISSUED | PENDING | REVOKED
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([institutionId])
+  @@index([studentId])
+  @@index([status])
+}
+
+model Notification {
+  id            String       @id @default(uuid())
+  userId        String?
+  user          User?        @relation(fields: [userId], references: [id])
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id])
+  title         String
+  message       String
+  isRead        Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+
+  @@index([userId])
+  @@index([institutionId])
+}
+
+model FileAsset {
+  id         String   @id @default(uuid())
+  entityType String   // STUDENT | TRAINER | INSTITUTION | CERTIFICATE
+  entityId   String
+  fileName   String
+  storageKey String   @unique
+  mimeType   String
+  fileSize   Int
+  uploadedBy String
+  uploadedAt DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
+
+model AuditLog {
+  id            String       @id @default(uuid())
+  actorId       String?
+  actor         User?        @relation(fields: [actorId], references: [id])
+  actorRole     String
+  actorEmail    String
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id])
+  action        String
+  module        String       @default("Platform")
+  entityType    String
+  entityId      String?
+  oldValue      String?
+  newValue      String?
+  ipAddress     String?
+  userAgent     String?
+  detailsJson   String
+  createdAt     DateTime     @default(now())
+
+  @@index([actorId])
+  @@index([institutionId])
+  @@index([entityType])
+  @@index([action])
+  @@index([createdAt])
+}
