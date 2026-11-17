@@ -89,9 +89,19 @@ export function LoginView({ onLoginSuccess }: { onLoginSuccess: () => void }) {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white text-[#0F3D2E]">
-      {/* Left Panel — Deep Forest Green */}
-      <div className="lg:w-5/12 bg-[#0F3D2E] text-white p-8 lg:p-12 flex flex-col justify-between">
-        <div>
+      {/* Left Panel — Deep Forest Green with 3D Andhra Pradesh Map Background */}
+      <div className="relative overflow-hidden lg:w-5/12 bg-[#0F3D2E] text-white p-8 lg:p-12 flex flex-col justify-between">
+        <img
+          src="/ap-map-3d.jpg"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none select-none absolute inset-0 w-full h-full object-cover object-center opacity-35"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[#0F3D2E]/55"
+        />
+        <div className="relative z-10">
           <div className="flex items-center gap-3.5">
             <BrandEmblem variant="light" size={46} />
             <div>
@@ -149,7 +159,7 @@ export function LoginView({ onLoginSuccess }: { onLoginSuccess: () => void }) {
           </div>
         </div>
 
-        <p className="mt-10 text-xs text-white/70 border-t border-white/20 pt-4">
+        <p className="relative z-10 mt-10 text-xs text-white/70 border-t border-white/20 pt-4">
           Andhra Pradesh Skill Development Program • Official Learning Management Portal
         </p>
       </div>
