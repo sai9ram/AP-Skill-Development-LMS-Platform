@@ -570,7 +570,7 @@ export function CollegeAdminWorkspace({
           </div>
         </header>
 
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 p-4 sm:p-6 pb-24 md:pb-6 overflow-y-auto">
           <NoticeBanner message={notice} onClose={() => setNotice("")} />
 
           {tab === "overview" && dashboard && (
@@ -859,7 +859,38 @@ export function CollegeAdminWorkspace({
                 </div>
               </div>
 
-              <div className="border border-[#0F3D2E]/25 rounded-lg overflow-hidden">
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3">
+                {students.map((s) => (
+                  <div key={s.id} className="p-4 border border-[#0F3D2E]/25 rounded-lg bg-white space-y-2 text-xs">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-bold text-sm">{s.fullName}</p>
+                        <p className="font-mono text-[11px] text-[#0F3D2E]/80">{s.studentUid}</p>
+                        <p className="font-mono text-[11px] text-[#0F3D2E]/70">Reg: {s.universityRollNo}</p>
+                      </div>
+                      <StatusBadge active={s.isActive} />
+                    </div>
+                    <p className="text-[11px] text-[#0F3D2E]/80">{s.branch} • Year {s.yearOfStudy} • {s.email}</p>
+                    <div className="pt-2 flex gap-2">
+                      <button
+                        onClick={() => setSelectedStudentId(s.id)}
+                        className="flex-1 py-2 bg-[#0F3D2E] text-white rounded text-xs font-bold cursor-pointer"
+                      >
+                        View Profile
+                      </button>
+                      <button
+                        onClick={() => toggleStudentStatus(s)}
+                        className="px-3 py-2 border border-[#0F3D2E] rounded text-xs font-bold cursor-pointer"
+                      >
+                        {s.isActive ? "Deactivate" : "Restore"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden md:block border border-[#0F3D2E]/25 rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-[#0F3D2E] text-white">
@@ -1201,7 +1232,49 @@ export function CollegeAdminWorkspace({
                 </div>
               </div>
 
-              <div className="border border-[#0F3D2E]/25 rounded-lg overflow-hidden">
+              {/* Mobile Attendance Cards */}
+              <div className="md:hidden space-y-3">
+                {attRoster.map((row, idx) => (
+                  <div key={row.student.id} className="p-4 border border-[#0F3D2E]/25 rounded-lg bg-white space-y-3 text-xs">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-bold text-sm">{row.student.fullName}</p>
+                        <p className="font-mono text-[11px] text-[#0F3D2E]/75">
+                          {row.student.studentUid} • {row.student.universityRollNo}
+                        </p>
+                      </div>
+                      <span className="px-2 py-1 rounded border border-[#0F3D2E] font-bold text-[11px]">
+                        {row.summary.attendancePercent}%
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#0F3D2E]/75">
+                      Present: {row.summary.present} • Absent: {row.summary.absent} • Late: {row.summary.late} • Sessions: {row.summary.totalConductedSessions}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["PRESENT", "ABSENT", "LATE", "EXCUSED"].map((st) => (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => {
+                            const next = [...attRoster];
+                            next[idx] = { ...row, status: st };
+                            setAttRoster(next);
+                          }}
+                          className={`py-2.5 rounded text-xs font-bold transition cursor-pointer ${
+                            row.status === st
+                              ? "bg-[#0F3D2E] text-white"
+                              : "border border-[#0F3D2E]/40 text-[#0F3D2E]"
+                          }`}
+                        >
+                          {st}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden md:block border border-[#0F3D2E]/25 rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-[#0F3D2E] text-white">
@@ -1393,6 +1466,34 @@ export function CollegeAdminWorkspace({
           )}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation Bar (App-like) */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0F3D2E] text-white border-t border-white/20 grid grid-cols-5">
+        {[
+          { id: "overview" as Tab, label: "Home", icon: <LayoutDashboard className="w-4 h-4" /> },
+          { id: "students" as Tab, label: "Students", icon: <Users className="w-4 h-4" /> },
+          { id: "attendance" as Tab, label: "Attend", icon: <ClipboardCheck className="w-4 h-4" /> },
+          { id: "notifications" as Tab, label: "Alerts", icon: <Bell className="w-4 h-4" /> },
+        ].map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setTab(item.id)}
+            className={`flex flex-col items-center justify-center py-2.5 gap-1 text-[10px] font-bold cursor-pointer ${
+              tab === item.id ? "bg-white text-[#0F3D2E]" : "text-white/90"
+            }`}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </button>
+        ))}
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className="flex flex-col items-center justify-center py-2.5 gap-1 text-[10px] font-bold text-white/90 cursor-pointer"
+        >
+          <Menu className="w-4 h-4" />
+          <span>Menu</span>
+        </button>
+      </nav>
     </div>
   );
 }

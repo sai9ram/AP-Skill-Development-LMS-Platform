@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline | AP Skill Development LMS</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0F3D2E;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+    }
+    .card {
+      background: #FFFFFF;
+      color: #0F3D2E;
+      border-radius: 12px;
+      padding: 32px 24px;
+      max-width: 380px;
+      width: 100%;
+    }
+    h1 { font-size: 20px; margin: 0 0 8px; }
+    p { font-size: 13px; line-height: 1.5; margin: 0 0 20px; }
+    button {
+      background: #0F3D2E;
+      color: #FFFFFF;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>You Are Currently Offline</h1>
+    <p>AP Skill Development LMS requires an internet connection to sync student, batch, and attendance records.</p>
+    <button onclick="window.location.reload()">Try Again</button>
+  </div>
+</body>
+</html>

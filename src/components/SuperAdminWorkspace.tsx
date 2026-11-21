@@ -698,7 +698,7 @@ export function SuperAdminWorkspace({
           </div>
         </header>
 
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 p-4 sm:p-6 pb-24 md:pb-6 overflow-y-auto">
           <NoticeBanner message={notice} onClose={() => setNotice("")} />
 
           {tab === "overview" && dashboard && (
@@ -1915,6 +1915,34 @@ export function SuperAdminWorkspace({
           )}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0F3D2E] text-white border-t border-white/20 grid grid-cols-5">
+        {[
+          { id: "overview" as SuperTab, label: "Home", icon: <LayoutDashboard className="w-4 h-4" /> },
+          { id: "search" as SuperTab, label: "Search", icon: <Search className="w-4 h-4" /> },
+          { id: "institutions" as SuperTab, label: "Colleges", icon: <Building2 className="w-4 h-4" /> },
+          { id: "students" as SuperTab, label: "Students", icon: <Users className="w-4 h-4" /> },
+        ].map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setTab(item.id)}
+            className={`flex flex-col items-center justify-center py-2.5 gap-1 text-[10px] font-bold cursor-pointer ${
+              tab === item.id ? "bg-white text-[#0F3D2E]" : "text-white/90"
+            }`}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </button>
+        ))}
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className="flex flex-col items-center justify-center py-2.5 gap-1 text-[10px] font-bold text-white/90 cursor-pointer"
+        >
+          <Menu className="w-4 h-4" />
+          <span>Menu</span>
+        </button>
+      </nav>
     </div>
   );
 }
